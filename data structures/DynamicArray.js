@@ -98,10 +98,13 @@ class DynamicArray {
     }
 
     popBack() {
-        // If empty → throw Error
-        // Remove last element
-        // Decrease size by 1
-        // Return removed value
+        if(this.#capacity === 0) throw new RangeError('Cannot run this function at capacity with 0.');
+        const newAddress = new Array(--this.#capacity).fill(this.#fill);
+        for(let i = 0;i < this.#size - 1;++i){
+            newAddress[i] = this.#arr[i];
+        }
+        --this.#size;
+        this.#arr = newAddress;
     }
 
     insert(pos, value) {
