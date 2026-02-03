@@ -3,12 +3,13 @@ class DynamicArray {
     #size;
     #capacity;
     #GROWTH = 2;
+    #fill = "empty";
 
-    constructor(cap = 0, fill = 0) {
+    constructor(cap = 0) {
         if(cap < 0) throw new RangeError('Not valid capacity');
         this.#size = 0;
         this.#capacity  = cap;
-        this.#arr = new Array(this.#size).fill(fill);
+        this.#arr = new Array(this.#size).fill(this.#fill);
     }
 
     /* ================= Capacity ================= */
@@ -27,61 +28,73 @@ class DynamicArray {
 
     reserve(n) {
         if(n <= this.#capacity) return;
-        
-        //   - allocate new buffer of size n
-        //   - copy first "size" elements
-        //   - replace old buffer
-        //   - update capacity
+        this.#capacity = n;
+        const newAddress = new Array(n).fill(this.#fill);
+        for(let i = 0;i < this.#size;++i){
+            newAddress[i] = this.#arr[i];
+        };
+        this.#arr = newAddress;
     }
 
     shrinkToFit() {
-        // Must reallocate buffer so that:
-        // capacity === size
-        // Only valid elements are kept
+        if(this.#capacity === this.#size){
+            const newAddress = new Array(this.#capacity).fill(this.#fill);
+            let index = 0;
+            for(let i = 0;i < this.#capacity; ++i){
+                if(this.#arr[i].includes(this.#fill)) continue;
+                newAddress[index] = this.#arr[i];
+            }
+            this.#arr = newAddress;
+        }
     }
 
     clear() {
-        // Must set size = 0
-        // Capacity must remain unchanged
+        this.#size = 0;
+        for(let i = 0;i < this.#arr.length;++i){
+            this.#arr[i] = this.#fill;
+        }
     }
 
     /* ================= Element Access ================= */
 
     at(i) {
-        // If i < 0 or i >= size → throw Error
-        // Otherwise return element at index i
+        if(i < 0 || i >= this.#capacity) throw new RangeError('invalid Index');
+        return this.#arr[i];
     }
 
     set(i, value) {
-        // If index invalid → throw Error
-        // If value is not a number → throw Error
-        // Otherwise overwrite element at index i
+        if(i < 0 || i >= this.#capacity || isNaN(i)) throw new RangeError('invalid Index');
+        this.#arr[i] = value;
     }
 
     front() {
-        // Must return first element
-        // Equivalent to at(0)
+        return this.#arr[0];
     }
 
     back() {
-        // Must return last element
-        // Equivalent to at(size - 1)
+        return this.#arr[this.#size - 1];
     }
 
     toArray() {
-        // Must return a normal JS array
-        // Must include only elements [0 ... size-1]
-        // Must NOT include unused capacity
+        const newArray = new Array(this.#size);
+        for(let i = 0;i < this.#size;++i){
+            newArray[i] = this.#arr[i];
+        }
+        return newArray;
     }
 
     /* ================= Modifiers ================= */
 
     pushBack(value) {
-        // If value is not number → throw Error
-        // If size === capacity:
-        //   - grow capacity (usually capacity * 2)
-        // Append value at the end
-        // Increase size by 1
+        if(isNaN(value)) throw new TypeError('Invalid Value');
+        const newAddress = new Array(this.#size == this.#capacity ? this.#capacity *= this.#GROWTH : this.capacity += 1)
+        .fill(this.#fill);
+        for(let i = 0;i < this.#size;++i){
+            newAddress[i] = this.#arr[i]
+        }
+        ++this.#size;
+        newAddress[this.#size] = value;
+        this.#arr = newAddress;
     }
 
     popBack() {
